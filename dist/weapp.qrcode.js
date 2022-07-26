@@ -1259,7 +1259,11 @@ function drawQrcode(options) {
     for (var row = 0; row < qrcode.getModuleCount(); row++) {
       for (var col = 0; col < qrcode.getModuleCount(); col++) {
         var style = qrcode.isDark(row, col) ? options.foreground : options.background;
-        ctx.setFillStyle(style);
+        if (ctx.setFillStyle) {
+          ctx.setFillStyle(style);
+        } else {
+          ctx.fillStyle = style;
+        }
         var w = Math.ceil((col + 1) * tileW) - Math.floor(col * tileW);
         var h = Math.ceil((row + 1) * tileW) - Math.floor(row * tileW);
         ctx.fillRect(Math.round(col * tileW) + options.x, Math.round(row * tileH) + options.y, w, h);
@@ -1270,9 +1274,15 @@ function drawQrcode(options) {
       ctx.drawImage(options.image.imageResource, options.image.dx, options.image.dy, options.image.dWidth, options.image.dHeight);
     }
 
-    ctx.draw(false, function (e) {
+    var callback = function (e) {
       options.callback && options.callback(e);
-    });
+    };
+
+    if (ctx.draw) {
+      ctx.draw(false, callback);
+    } else {
+      callback();
+    }
   }
 }
 
